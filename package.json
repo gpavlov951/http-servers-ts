@@ -1,0 +1,25 @@
+{
+  "name": "http-servers-ts",
+  "version": "1.0.0",
+  "description": "https://www.boot.dev/lessons/3c83ee38-8e4a-4ab2-8a52-41e15dea698f",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "Georgi Pavlov",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0",
+    "tsx": "^4.19.4"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.29",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.8.3"
+  }
+}

@@ -9,15 +9,15 @@ const app = express();
 const PORT = 8080;
 
 app.use(express.json());
-
 app.use(middlewareLogResponses);
-
 app.use("/app", middlewareMetricsInc, express.static("./src/app"));
 
 app.get("/api/healthz", handlerReadiness);
 app.post("/api/validate_chirp", handlerValidateChirp);
 app.get("/admin/metrics", handlerMetrics);
 app.post("/admin/reset", handlerReset);
+
+app.use(middlewareErrorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
@@ -47,41 +47,42 @@ function handlerReset(req: Request, res: Response) {
   res.send("Reset successful");
 }
 
-function handlerValidateChirp(req: Request, res: Response) {
-  const { body } = req.body;
+function handlerValidateChirp(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { body } = req.body;
 
-  if (!body) {
-    res.status(400).json({
-      error: "Missing required field: body",
+    if (!body) {
+      res.status(400).json({
+        error: "Missing required field: body",
+      });
+      return;
+    }
+
+    if (typeof body !== "string") {
+      res.status(400).json({
+        error: "Body must be a string",
+      });
+      return;
+    }
+
+    if (body.length > 140) {
+      throw new Error("Chirp is too long");
+    }
+
+    const profaneWords = ["kerfuffle", "sharbert", "fornax"];
+    let cleanedBody = body;
+
+    profaneWords.forEach((word) => {
+      const regex = new RegExp(`\\b${word}\\b`, "gi");
+      cleanedBody = cleanedBody.replace(regex, "****");
     });
-    return;
-  }
 
-  if (typeof body !== "string") {
-    res.status(400).json({
-      error: "Body must be a string",
+    res.status(200).json({
+      cleanedBody: cleanedBody,
     });
-    return;
+  } catch (error) {
+    next(error);
   }
-
-  if (body.length > 140) {
-    res.status(400).json({
-      error: "Chirp is too long",
-    });
-    return;
-  }
-
-  const profaneWords = ["kerfuffle", "sharbert", "fornax"];
-  let cleanedBody = body;
-
-  profaneWords.forEach((word) => {
-    const regex = new RegExp(`\\b${word}\\b`, "gi");
-    cleanedBody = cleanedBody.replace(regex, "****");
-  });
-
-  res.status(200).json({
-    cleanedBody: cleanedBody,
-  });
 }
 
 function middlewareLogResponses(
@@ -107,4 +108,16 @@ function middlewareLogResponses(
 function middlewareMetricsInc(req: Request, res: Response, next: NextFunction) {
   API_CONFIG.fileserverHits++;
   next();
+}
+
+function middlewareErrorHandler(
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  console.log(err);
+  res.status(500).json({
+    error: "Something went wrong on our end",
+  });
 }

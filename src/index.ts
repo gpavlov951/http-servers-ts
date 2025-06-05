@@ -4,6 +4,7 @@ import express, {
   type Response,
 } from "express";
 import { API_CONFIG } from "./config.js";
+import { BadRequestError, isCustomError } from "./errors.js";
 
 const app = express();
 const PORT = 8080;
@@ -66,7 +67,7 @@ function handlerValidateChirp(req: Request, res: Response, next: NextFunction) {
     }
 
     if (body.length > 140) {
-      throw new Error("Chirp is too long");
+      throw new BadRequestError("Chirp is too long. Max length is 140");
     }
 
     const profaneWords = ["kerfuffle", "sharbert", "fornax"];
@@ -117,6 +118,15 @@ function middlewareErrorHandler(
   next: NextFunction
 ) {
   console.log(err);
+
+  if (isCustomError(err)) {
+    res.status(err.statusCode).json({
+      error: err.message,
+    });
+
+    return;
+  }
+
   res.status(500).json({
     error: "Something went wrong on our end",
   });

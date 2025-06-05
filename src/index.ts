@@ -50,7 +50,6 @@ function handlerReset(req: Request, res: Response) {
 function handlerValidateChirp(req: Request, res: Response) {
   const { body } = req.body;
 
-  // Check if body field exists
   if (!body) {
     res.status(400).json({
       error: "Missing required field: body",
@@ -58,7 +57,6 @@ function handlerValidateChirp(req: Request, res: Response) {
     return;
   }
 
-  // Check if body is a string
   if (typeof body !== "string") {
     res.status(400).json({
       error: "Body must be a string",
@@ -66,7 +64,6 @@ function handlerValidateChirp(req: Request, res: Response) {
     return;
   }
 
-  // Check if chirp is too long (more than 140 characters)
   if (body.length > 140) {
     res.status(400).json({
       error: "Chirp is too long",
@@ -74,9 +71,16 @@ function handlerValidateChirp(req: Request, res: Response) {
     return;
   }
 
-  // Chirp is valid
+  const profaneWords = ["kerfuffle", "sharbert", "fornax"];
+  let cleanedBody = body;
+
+  profaneWords.forEach((word) => {
+    const regex = new RegExp(`\\b${word}\\b`, "gi");
+    cleanedBody = cleanedBody.replace(regex, "****");
+  });
+
   res.status(200).json({
-    valid: true,
+    cleanedBody: cleanedBody,
   });
 }
 

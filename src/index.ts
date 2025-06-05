@@ -8,13 +8,16 @@ import { API_CONFIG } from "./config.js";
 const app = express();
 const PORT = 8080;
 
+app.use(express.json());
+
 app.use(middlewareLogResponses);
 
 app.use("/app", middlewareMetricsInc, express.static("./src/app"));
 
 app.get("/api/healthz", handlerReadiness);
-app.get("/api/metrics", handlerMetrics);
-app.get("/api/reset", handlerReset);
+app.post("/api/validate_chirp", handlerValidateChirp);
+app.get("/admin/metrics", handlerMetrics);
+app.post("/admin/reset", handlerReset);
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
@@ -26,14 +29,55 @@ function handlerReadiness(req: Request, res: Response) {
 }
 
 function handlerMetrics(req: Request, res: Response) {
-  res.setHeader("Content-Type", "text/plain");
-  res.send(`Hits: ${API_CONFIG.fileserverHits}`);
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+
+  res.send(`
+    <html>
+      <body>
+        <h1>Welcome, Chirpy Admin</h1>
+        <p>Chirpy has been visited ${API_CONFIG.fileserverHits} times!</p>
+      </body>
+    </html>
+  `);
 }
 
 function handlerReset(req: Request, res: Response) {
   API_CONFIG.fileserverHits = 0;
   res.setHeader("Content-Type", "text/plain");
   res.send("Reset successful");
+}
+
+function handlerValidateChirp(req: Request, res: Response) {
+  const { body } = req.body;
+
+  // Check if body field exists
+  if (!body) {
+    res.status(400).json({
+      error: "Missing required field: body",
+    });
+    return;
+  }
+
+  // Check if body is a string
+  if (typeof body !== "string") {
+    res.status(400).json({
+      error: "Body must be a string",
+    });
+    return;
+  }
+
+  // Check if chirp is too long (more than 140 characters)
+  if (body.length > 140) {
+    res.status(400).json({
+      error: "Chirp is too long",
+    });
+    return;
+  }
+
+  // Chirp is valid
+  res.status(200).json({
+    valid: true,
+  });
 }
 
 function middlewareLogResponses(

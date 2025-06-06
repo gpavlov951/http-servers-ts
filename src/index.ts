@@ -3,17 +3,12 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import express from "express";
 import postgres from "postgres";
 import { API_CONFIG } from "./config.js";
-import {
-  handlerMetrics,
-  handlerReadiness,
-  handlerReset,
-  handlerValidateChirp,
-} from "./handlers.js";
+import { adminRouter, apiRouter } from "./routes/index.js";
 import {
   middlewareErrorHandler,
   middlewareLogResponses,
   middlewareMetricsInc,
-} from "./middlewares.js";
+} from "./shared/middlewares.js";
 
 const migrationClient = postgres(API_CONFIG.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), API_CONFIG.db.migrationConfig);
@@ -24,11 +19,8 @@ app.use(express.json());
 app.use(middlewareLogResponses);
 app.use("/app", middlewareMetricsInc, express.static("./src/app"));
 
-app.get("/api/healthz", handlerReadiness);
-app.post("/api/validate_chirp", handlerValidateChirp);
-
-app.get("/admin/metrics", handlerMetrics);
-app.post("/admin/reset", handlerReset);
+app.use("/api", apiRouter);
+app.use("/admin", adminRouter);
 
 app.use(middlewareErrorHandler);
 

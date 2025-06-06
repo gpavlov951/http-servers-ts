@@ -1,4 +1,8 @@
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
 import express from "express";
+import postgres from "postgres";
+import { API_CONFIG } from "./config.js";
 import {
   handlerMetrics,
   handlerReadiness,
@@ -11,8 +15,10 @@ import {
   middlewareMetricsInc,
 } from "./middlewares.js";
 
+const migrationClient = postgres(API_CONFIG.db.url, { max: 1 });
+await migrate(drizzle(migrationClient), API_CONFIG.db.migrationConfig);
+
 const app = express();
-const PORT = 8080;
 
 app.use(express.json());
 app.use(middlewareLogResponses);
@@ -26,6 +32,6 @@ app.post("/admin/reset", handlerReset);
 
 app.use(middlewareErrorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+app.listen(API_CONFIG.api.port, () => {
+  console.log(`Server is running at http://localhost:${API_CONFIG.api.port}`);
 });

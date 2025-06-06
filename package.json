@@ -6,19 +6,25 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "type": "module",
   "keywords": [],
   "author": "Georgi Pavlov",
   "license": "MIT",
   "dependencies": {
+    "drizzle-orm": "^0.44.2",
     "express": "^5.1.0",
+    "postgres": "^3.4.7",
     "tsx": "^4.19.4"
   },
   "devDependencies": {
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.29",
+    "drizzle-kit": "^0.31.1",
     "nodemon": "^3.1.10",
     "typescript": "^5.8.3"
   }

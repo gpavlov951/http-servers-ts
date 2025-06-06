@@ -14,14 +14,14 @@ export function handlerMetrics(req: Request, res: Response) {
     <html>
       <body>
         <h1>Welcome, Chirpy Admin</h1>
-        <p>Chirpy has been visited ${API_CONFIG.fileserverHits} times!</p>
+        <p>Chirpy has been visited ${API_CONFIG.api.fileserverHits} times!</p>
       </body>
     </html>
   `);
 }
 
 export function handlerReset(req: Request, res: Response) {
-  API_CONFIG.fileserverHits = 0;
+  API_CONFIG.api.fileserverHits = 0;
   res.setHeader("Content-Type", "text/plain");
   res.send("Reset successful");
 }

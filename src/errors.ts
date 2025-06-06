@@ -7,7 +7,7 @@ export class BadRequestError extends Error {
   }
 }
 
-export class UnauthorizedError extends Error {
+class UnauthorizedError extends Error {
   public readonly statusCode = 401;
 
   constructor(message: string) {
@@ -16,7 +16,7 @@ export class UnauthorizedError extends Error {
   }
 }
 
-export class ForbiddenError extends Error {
+class ForbiddenError extends Error {
   public readonly statusCode = 403;
 
   constructor(message: string) {
@@ -25,7 +25,7 @@ export class ForbiddenError extends Error {
   }
 }
 
-export class NotFoundError extends Error {
+class NotFoundError extends Error {
   public readonly statusCode = 404;
 
   constructor(message: string) {
@@ -34,7 +34,7 @@ export class NotFoundError extends Error {
   }
 }
 
-export type CustomError =
+type CustomError =
   | BadRequestError
   | UnauthorizedError
   | ForbiddenError

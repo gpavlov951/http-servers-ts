@@ -1,9 +1,7 @@
 import { Router } from "express";
+import { adminRoutes } from "../features/admin/admin.routes.js";
 import { chirpApiRoutes } from "../features/chirps/chirp.routes.js";
-import {
-  healthAdminRoutes,
-  healthApiRoutes,
-} from "../features/health/health.routes.js";
+import { healthApiRoutes } from "../features/health/health.routes.js";
 import { userApiRoutes } from "../features/users/user.routes.js";
 
 const apiRouter = Router();
@@ -13,6 +11,6 @@ apiRouter.use("/users", userApiRoutes);
 apiRouter.use("/chirps", chirpApiRoutes);
 apiRouter.use("/", healthApiRoutes);
 
-adminRouter.use("/", healthAdminRoutes);
+adminRouter.use("/", adminRoutes);
 
 export { adminRouter, apiRouter };

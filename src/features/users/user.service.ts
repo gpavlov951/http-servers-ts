@@ -61,4 +61,8 @@ export const userService = {
       throw new NotFoundError("User not found");
     }
   },
+
+  async deleteAllUsers(): Promise<void> {
+    await db.delete(users);
+  },
 };

@@ -2,12 +2,16 @@ import type { MigrationConfig } from "drizzle-orm/migrator";
 
 process.loadEnvFile();
 
+const platform = ["dev", "prod"] as const;
+type Platform = (typeof platform)[number];
+
 type APIConfig = {
   api: {
     port: number;
     fileserverHits: number;
   };
   db: { url: string; migrationConfig: MigrationConfig };
+  platform: Platform;
 };
 
 export const API_CONFIG: APIConfig = {
@@ -21,6 +25,7 @@ export const API_CONFIG: APIConfig = {
       migrationsFolder: "./src/db/migrations",
     },
   },
+  platform: envOrThrowEnum("PLATFORM", [...platform]),
 };
 
 function envOrThrow(key: string): string {
@@ -29,4 +34,12 @@ function envOrThrow(key: string): string {
     throw new Error(`Environment variable ${key} is not set`);
   }
   return value;
+}
+
+function envOrThrowEnum<T extends string>(key: string, enumValues: T[]): T {
+  const value = process.env[key];
+  if (!value || !enumValues.includes(value as T)) {
+    throw new Error(`Environment variable ${key} is not set or invalid`);
+  }
+  return value as T;
 }

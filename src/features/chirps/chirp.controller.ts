@@ -10,4 +10,13 @@ export const chirpController = {
       next(error);
     }
   },
+
+  async createChirp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await chirpService.createChirp(req.body);
+      res.status(201).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

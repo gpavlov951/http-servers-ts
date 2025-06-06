@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { API_CONFIG } from "../config.js";
-import { isCustomError } from "./errors";
+import { isCustomError } from "./errors.js";
 
 export function middlewareLogResponses(
   req: Request,

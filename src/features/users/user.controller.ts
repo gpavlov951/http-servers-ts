@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
 import { userService } from "./user.service.js";
-import type { LoginRequest } from "./user.types.js";
 
 export const userController = {
   async getUsers(req: Request, res: Response, next: NextFunction) {
@@ -16,28 +15,6 @@ export const userController = {
     try {
       const { id } = req.params;
       const user = await userService.getUserById(id);
-      res.json(user);
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  async login(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { email, password }: LoginRequest = req.body;
-
-      if (!email || !password) {
-        res.status(400).json({ error: "Email and password are required" });
-        return;
-      }
-
-      const user = await userService.login(email, password);
-
-      if (!user) {
-        res.status(401).json({ error: "Incorrect email or password" });
-        return;
-      }
-
       res.json(user);
     } catch (error) {
       next(error);

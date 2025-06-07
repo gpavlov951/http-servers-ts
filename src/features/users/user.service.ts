@@ -1,27 +1,63 @@
 import { eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { users, type NewUser, type User } from "../../db/schema/users.js";
+import { checkPasswordHash, hashPassword } from "../../shared/auth.js";
 import { NotFoundError } from "../../shared/errors.js";
 import type { CreateUserRequest, UpdateUserRequest } from "./user.types.js";
 
 export const userService = {
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users);
+  async getAllUsers(): Promise<Omit<User, "hashedPassword">[]> {
+    const allUsers = await db.select().from(users);
+    return allUsers.map(({ hashedPassword, ...user }) => user);
   },
 
-  async getUserById(id: string): Promise<User> {
+  async getUserById(id: string): Promise<Omit<User, "hashedPassword">> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
 
     if (!user) {
       throw new NotFoundError("User not found");
     }
 
-    return user;
+    const { hashedPassword, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   },
 
-  async createUser(userData: CreateUserRequest): Promise<User> {
+  async getUserByEmail(email: string): Promise<User | null> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || null;
+  },
+
+  async login(
+    email: string,
+    password: string
+  ): Promise<Omit<User, "hashedPassword"> | null> {
+    const user = await this.getUserByEmail(email);
+
+    if (!user) {
+      return null;
+    }
+
+    const isPasswordValid = await checkPasswordHash(
+      password,
+      user.hashedPassword
+    );
+
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    const { hashedPassword, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  },
+
+  async createUser(
+    userData: CreateUserRequest
+  ): Promise<Omit<User, "hashedPassword">> {
+    const hashedPasswordValue = await hashPassword(userData.password);
+
     const newUser: NewUser = {
       email: userData.email,
+      hashedPassword: hashedPasswordValue,
     };
 
     const [result] = await db
@@ -34,10 +70,14 @@ export const userService = {
       throw new Error("Failed to create user");
     }
 
-    return result;
+    const { hashedPassword, ...userWithoutPassword } = result;
+    return userWithoutPassword;
   },
 
-  async updateUser(id: string, userData: UpdateUserRequest): Promise<User> {
+  async updateUser(
+    id: string,
+    userData: UpdateUserRequest
+  ): Promise<Omit<User, "hashedPassword">> {
     const [result] = await db
       .update(users)
       .set({
@@ -51,7 +91,8 @@ export const userService = {
       throw new NotFoundError("User not found");
     }
 
-    return result;
+    const { hashedPassword, ...userWithoutPassword } = result;
+    return userWithoutPassword;
   },
 
   async deleteUser(id: string): Promise<void> {

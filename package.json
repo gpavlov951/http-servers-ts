@@ -16,12 +16,14 @@
   "author": "Georgi Pavlov",
   "license": "MIT",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "drizzle-orm": "^0.44.2",
     "express": "^5.1.0",
     "postgres": "^3.4.7",
     "tsx": "^4.19.4"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.29",
     "drizzle-kit": "^0.31.1",

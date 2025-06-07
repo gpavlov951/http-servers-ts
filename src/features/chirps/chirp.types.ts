@@ -34,3 +34,8 @@ export interface GetChirpByIdResponse {
   body: string;
   userId: string;
 }
+
+export interface DeleteChirpRequest {
+  chirpID: string;
+  userId: string;
+}

@@ -58,4 +58,26 @@ export const chirpController = {
       next(error);
     }
   },
+
+  async deleteChirp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const token = getBearerToken(req);
+      const userId = validateJWT(token, API_CONFIG.jwtSecret);
+      const { chirpID } = req.params;
+
+      await chirpService.deleteChirp(chirpID, userId);
+      res.status(204).send();
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.message.includes("Authorization header") ||
+          error.message.includes("Invalid token") ||
+          error.message.includes("Token expired"))
+      ) {
+        next(new UnauthorizedError(error.message));
+        return;
+      }
+      next(error);
+    }
+  },
 };

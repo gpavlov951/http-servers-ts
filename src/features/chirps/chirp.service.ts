@@ -1,7 +1,11 @@
 import { asc, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { chirps } from "../../db/schema/index.js";
-import { BadRequestError, NotFoundError } from "../../shared/errors.js";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from "../../shared/errors.js";
 import type {
   CreateChirpRequest,
   CreateChirpResponse,
@@ -117,5 +121,19 @@ export const chirpService = {
       body: newChirp.body,
       userId: newChirp.userId,
     };
+  },
+
+  async deleteChirp(id: string, userId: string): Promise<void> {
+    const [chirp] = await db.select().from(chirps).where(eq(chirps.id, id));
+
+    if (!chirp) {
+      throw new NotFoundError("Chirp not found");
+    }
+
+    if (chirp.userId !== userId) {
+      throw new ForbiddenError("You can only delete your own chirps");
+    }
+
+    await db.delete(chirps).where(eq(chirps.id, id));
   },
 };

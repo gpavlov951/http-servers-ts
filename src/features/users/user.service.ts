@@ -3,7 +3,11 @@ import { db } from "../../db/index.js";
 import { users, type NewUser, type User } from "../../db/schema/users.js";
 import { hashPassword } from "../../shared/auth.js";
 import { NotFoundError } from "../../shared/errors.js";
-import type { CreateUserRequest, UpdateUserRequest } from "./user.types.js";
+import type {
+  AuthenticatedUpdateUserRequest,
+  CreateUserRequest,
+  UpdateUserRequest,
+} from "./user.types.js";
 
 export const userService = {
   async getAllUsers(): Promise<Omit<User, "hashedPassword">[]> {
@@ -77,5 +81,29 @@ export const userService = {
 
   async deleteAllUsers(): Promise<void> {
     await db.delete(users);
+  },
+
+  async updateAuthenticatedUser(
+    id: string,
+    userData: AuthenticatedUpdateUserRequest
+  ): Promise<Omit<User, "hashedPassword">> {
+    const hashedPasswordValue = await hashPassword(userData.password);
+
+    const [result] = await db
+      .update(users)
+      .set({
+        email: userData.email,
+        hashedPassword: hashedPasswordValue,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+
+    if (!result) {
+      throw new NotFoundError("User not found");
+    }
+
+    const { hashedPassword, ...userWithoutPassword } = result;
+    return userWithoutPassword;
   },
 };

@@ -7,6 +7,11 @@ export interface UpdateUserRequest {
   email?: string;
 }
 
+export interface AuthenticatedUpdateUserRequest {
+  email: string;
+  password: string;
+}
+
 export interface UserResponse {
   id: string;
   email: string;

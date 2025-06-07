@@ -5,14 +5,14 @@ import type { LoginRequest } from "./login.types.js";
 export const loginController = {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email, password }: LoginRequest = req.body;
+      const { email, password, expiresInSeconds }: LoginRequest = req.body;
 
       if (!email || !password) {
         res.status(400).json({ error: "Email and password are required" });
         return;
       }
 
-      const user = await loginService.login(email, password);
+      const user = await loginService.login(email, password, expiresInSeconds);
 
       if (!user) {
         res.status(401).json({ error: "Incorrect email or password" });

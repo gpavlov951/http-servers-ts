@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import type { Request } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
 export async function hashPassword(password: string): Promise<string> {
@@ -11,6 +12,26 @@ export async function checkPasswordHash(
   hash: string
 ): Promise<boolean> {
   return await bcrypt.compare(password, hash);
+}
+
+export function getBearerToken(req: Request): string {
+  const authHeader = req.get("authorization");
+
+  if (!authHeader) {
+    throw new Error("Authorization header is missing");
+  }
+
+  if (!authHeader.startsWith("Bearer ")) {
+    throw new Error("Authorization header must start with 'Bearer '");
+  }
+
+  const token = authHeader.substring(7).trim();
+
+  if (!token) {
+    throw new Error("Token is missing from Authorization header");
+  }
+
+  return token;
 }
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;

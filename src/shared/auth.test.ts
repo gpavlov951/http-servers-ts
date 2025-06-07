@@ -1,5 +1,96 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { checkPasswordHash, hashPassword, makeJWT, validateJWT } from "./auth";
+import {
+  checkPasswordHash,
+  getBearerToken,
+  hashPassword,
+  makeJWT,
+  validateJWT,
+} from "./auth";
+
+describe("getBearerToken", () => {
+  it("should extract token from valid Authorization header", () => {
+    const mockReq = {
+      get: (headerName: string) => {
+        if (headerName === "authorization") {
+          return "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test";
+        }
+        return undefined;
+      },
+    } as any;
+
+    const token = getBearerToken(mockReq);
+    expect(token).toBe("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test");
+  });
+
+  it("should handle Authorization header with extra whitespace", () => {
+    const mockReq = {
+      get: (headerName: string) => {
+        if (headerName === "authorization") {
+          return "Bearer   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test   ";
+        }
+        return undefined;
+      },
+    } as any;
+
+    const token = getBearerToken(mockReq);
+    expect(token).toBe("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test");
+  });
+
+  it("should throw error when Authorization header is missing", () => {
+    const mockReq = {
+      get: (headerName: string) => undefined,
+    } as any;
+
+    expect(() => {
+      getBearerToken(mockReq);
+    }).toThrow("Authorization header is missing");
+  });
+
+  it("should throw error when Authorization header doesn't start with Bearer", () => {
+    const mockReq = {
+      get: (headerName: string) => {
+        if (headerName === "authorization") {
+          return "Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test";
+        }
+        return undefined;
+      },
+    } as any;
+
+    expect(() => {
+      getBearerToken(mockReq);
+    }).toThrow("Authorization header must start with 'Bearer '");
+  });
+
+  it("should throw error when token is empty after Bearer prefix", () => {
+    const mockReq = {
+      get: (headerName: string) => {
+        if (headerName === "authorization") {
+          return "Bearer ";
+        }
+        return undefined;
+      },
+    } as any;
+
+    expect(() => {
+      getBearerToken(mockReq);
+    }).toThrow("Token is missing from Authorization header");
+  });
+
+  it("should throw error when token is only whitespace after Bearer prefix", () => {
+    const mockReq = {
+      get: (headerName: string) => {
+        if (headerName === "authorization") {
+          return "Bearer    ";
+        }
+        return undefined;
+      },
+    } as any;
+
+    expect(() => {
+      getBearerToken(mockReq);
+    }).toThrow("Token is missing from Authorization header");
+  });
+});
 
 describe("JWT Authentication", () => {
   const secret = "test-secret-key";

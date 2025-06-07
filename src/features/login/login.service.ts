@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
+import { API_CONFIG } from "../../config.js";
 import { db } from "../../db/index.js";
 import { users, type User } from "../../db/schema/users.js";
-import { checkPasswordHash } from "../../shared/auth.js";
+import { checkPasswordHash, makeJWT } from "../../shared/auth.js";
 
 export const loginService = {
   async getUserByEmail(email: string): Promise<User | null> {
@@ -11,8 +12,9 @@ export const loginService = {
 
   async login(
     email: string,
-    password: string
-  ): Promise<Omit<User, "hashedPassword"> | null> {
+    password: string,
+    expiresInSeconds?: number
+  ): Promise<(Omit<User, "hashedPassword"> & { token: string }) | null> {
     const user = await this.getUserByEmail(email);
 
     if (!user) {
@@ -28,7 +30,19 @@ export const loginService = {
       return null;
     }
 
+    const oneHourInSeconds = 3600;
+    let tokenExpiresIn = oneHourInSeconds;
+
+    if (expiresInSeconds !== undefined) {
+      tokenExpiresIn = Math.min(expiresInSeconds, oneHourInSeconds);
+    }
+
+    const token = makeJWT(user.id, tokenExpiresIn, API_CONFIG.jwtSecret);
+
     const { hashedPassword, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return {
+      ...userWithoutPassword,
+      token,
+    };
   },
 };

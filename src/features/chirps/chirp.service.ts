@@ -1,9 +1,11 @@
+import { asc } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { chirps } from "../../db/schema/index.js";
 import { BadRequestError } from "../../shared/errors.js";
 import type {
   CreateChirpRequest,
   CreateChirpResponse,
+  GetAllChirpsResponse,
   ValidateChirpRequest,
   ValidateChirpResponse,
 } from "./chirp.types.js";
@@ -41,6 +43,21 @@ export const chirpService = {
     return {
       cleanedBody: cleanedBody,
     };
+  },
+
+  async getAllChirps(): Promise<GetAllChirpsResponse[]> {
+    const allChirps = await db
+      .select()
+      .from(chirps)
+      .orderBy(asc(chirps.createdAt));
+
+    return allChirps.map((chirp) => ({
+      id: chirp.id,
+      createdAt: chirp.createdAt.toISOString(),
+      updatedAt: chirp.updatedAt.toISOString(),
+      body: chirp.body,
+      userId: chirp.userId,
+    }));
   },
 
   async createChirp(data: CreateChirpRequest): Promise<CreateChirpResponse> {

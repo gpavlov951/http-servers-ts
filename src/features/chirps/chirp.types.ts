@@ -18,3 +18,11 @@ export interface CreateChirpResponse {
   body: string;
   userId: string;
 }
+
+export interface GetAllChirpsResponse {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  body: string;
+  userId: string;
+}

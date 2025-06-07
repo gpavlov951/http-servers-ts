@@ -5,4 +5,9 @@ const loginApiRoutes = Router();
 
 loginApiRoutes.post("/", loginController.login);
 
-export { loginApiRoutes };
+const refreshApiRoutes = Router();
+
+refreshApiRoutes.post("/refresh", loginController.refresh);
+refreshApiRoutes.post("/revoke", loginController.revoke);
+
+export { loginApiRoutes, refreshApiRoutes };

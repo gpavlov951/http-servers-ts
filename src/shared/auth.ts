@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import type { Request } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
@@ -72,4 +73,8 @@ export function validateJWT(tokenString: string, secret: string): string {
       throw error;
     }
   }
+}
+
+export function makeRefreshToken(): string {
+  return crypto.randomBytes(32).toString("hex");
 }

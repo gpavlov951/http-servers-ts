@@ -11,6 +11,16 @@ export const chirpController = {
     }
   },
 
+  async getChirpById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { chirpID } = req.params;
+      const result = await chirpService.getChirpById(chirpID);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   validateChirp(req: Request, res: Response, next: NextFunction) {
     try {
       const result = chirpService.validateChirp(req.body);

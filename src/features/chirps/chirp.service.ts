@@ -1,11 +1,12 @@
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { chirps } from "../../db/schema/index.js";
-import { BadRequestError } from "../../shared/errors.js";
+import { BadRequestError, NotFoundError } from "../../shared/errors.js";
 import type {
   CreateChirpRequest,
   CreateChirpResponse,
   GetAllChirpsResponse,
+  GetChirpByIdResponse,
   ValidateChirpRequest,
   ValidateChirpResponse,
 } from "./chirp.types.js";
@@ -58,6 +59,22 @@ export const chirpService = {
       body: chirp.body,
       userId: chirp.userId,
     }));
+  },
+
+  async getChirpById(id: string): Promise<GetChirpByIdResponse> {
+    const [chirp] = await db.select().from(chirps).where(eq(chirps.id, id));
+
+    if (!chirp) {
+      throw new NotFoundError("Chirp not found");
+    }
+
+    return {
+      id: chirp.id,
+      createdAt: chirp.createdAt.toISOString(),
+      updatedAt: chirp.updatedAt.toISOString(),
+      body: chirp.body,
+      userId: chirp.userId,
+    };
   },
 
   async createChirp(data: CreateChirpRequest): Promise<CreateChirpResponse> {

@@ -106,4 +106,19 @@ export const userService = {
     const { hashedPassword, ...userWithoutPassword } = result;
     return userWithoutPassword;
   },
+
+  async upgradeUserToChirpyRed(id: string): Promise<void> {
+    const [result] = await db
+      .update(users)
+      .set({
+        isChirpyRed: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+
+    if (!result) {
+      throw new NotFoundError("User not found");
+    }
+  },
 };

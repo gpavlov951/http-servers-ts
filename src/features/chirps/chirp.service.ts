@@ -50,11 +50,14 @@ export const chirpService = {
     };
   },
 
-  async getAllChirps(): Promise<GetAllChirpsResponse[]> {
-    const allChirps = await db
-      .select()
-      .from(chirps)
-      .orderBy(asc(chirps.createdAt));
+  async getAllChirps(authorId?: string): Promise<GetAllChirpsResponse[]> {
+    const baseQuery = db.select().from(chirps);
+
+    const allChirps = authorId
+      ? await baseQuery
+          .where(eq(chirps.userId, authorId))
+          .orderBy(asc(chirps.createdAt))
+      : await baseQuery.orderBy(asc(chirps.createdAt));
 
     return allChirps.map((chirp) => ({
       id: chirp.id,

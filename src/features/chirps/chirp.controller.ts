@@ -7,7 +7,8 @@ import { chirpService } from "./chirp.service.js";
 export const chirpController = {
   async getAllChirps(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await chirpService.getAllChirps();
+      const { authorId } = req.query;
+      const result = await chirpService.getAllChirps(authorId as string);
       res.status(200).json(result);
     } catch (error) {
       next(error);

@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-import { UnauthorizedError } from "src/shared/errors.js";
 import { API_CONFIG } from "../../config.js";
 import { getAPIKey } from "../../shared/auth.js";
+import { UnauthorizedError } from "../../shared/errors.js";
 import { userService } from "../users/user.service.js";
 import type { PolkaWebhookRequest } from "./webhook.types.js";
 

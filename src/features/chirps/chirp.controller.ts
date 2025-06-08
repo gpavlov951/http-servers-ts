@@ -7,8 +7,15 @@ import { chirpService } from "./chirp.service.js";
 export const chirpController = {
   async getAllChirps(req: Request, res: Response, next: NextFunction) {
     try {
-      const { authorId } = req.query;
-      const result = await chirpService.getAllChirps(authorId as string);
+      const { authorId: authorIdQuery, sort } = req.query;
+      const sortParam = sort === "desc" ? "desc" : "asc";
+
+      let authorId = "";
+      if (typeof authorIdQuery === "string") {
+        authorId = authorIdQuery;
+      }
+
+      const result = await chirpService.getAllChirps(authorId, sortParam);
       res.status(200).json(result);
     } catch (error) {
       next(error);

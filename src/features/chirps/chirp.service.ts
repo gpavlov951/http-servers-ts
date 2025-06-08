@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { chirps } from "../../db/schema/index.js";
 import {
@@ -50,14 +50,19 @@ export const chirpService = {
     };
   },
 
-  async getAllChirps(authorId?: string): Promise<GetAllChirpsResponse[]> {
+  async getAllChirps(
+    authorId?: string,
+    sort: "asc" | "desc" = "asc"
+  ): Promise<GetAllChirpsResponse[]> {
     const baseQuery = db.select().from(chirps);
+    const orderByClause =
+      sort === "desc" ? desc(chirps.createdAt) : asc(chirps.createdAt);
 
     const allChirps = authorId
       ? await baseQuery
           .where(eq(chirps.userId, authorId))
-          .orderBy(asc(chirps.createdAt))
-      : await baseQuery.orderBy(asc(chirps.createdAt));
+          .orderBy(orderByClause)
+      : await baseQuery.orderBy(orderByClause);
 
     return allChirps.map((chirp) => ({
       id: chirp.id,

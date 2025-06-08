@@ -13,6 +13,7 @@ type APIConfig = {
   db: { url: string; migrationConfig: MigrationConfig };
   platform: Platform;
   jwtSecret: string;
+  polkaKey: string;
 };
 
 export const API_CONFIG: APIConfig = {
@@ -28,6 +29,7 @@ export const API_CONFIG: APIConfig = {
   },
   platform: envOrThrowEnum("PLATFORM", [...platform]),
   jwtSecret: envOrThrow("JWT_SECRET"),
+  polkaKey: envOrThrow("POLKA_KEY"),
 };
 
 function envOrThrow(key: string): string {

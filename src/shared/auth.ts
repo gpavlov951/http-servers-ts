@@ -35,6 +35,29 @@ export function getBearerToken(req: Request): string {
   return token;
 }
 
+export function getAPIKey(req: Request): string {
+  const apiKey = req.get("authorization");
+
+  if (!apiKey) {
+    throw new Error("API key is missing");
+  }
+
+  const startsWith = "ApiKey ";
+  const startsWithLength = startsWith.length;
+
+  if (!apiKey.startsWith(startsWith)) {
+    throw new Error(`API key must start with '${startsWith}'`);
+  }
+
+  const key = apiKey.substring(startsWithLength).trim();
+
+  if (!key) {
+    throw new Error("API key is missing");
+  }
+
+  return key;
+}
+
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
 export function makeJWT(
